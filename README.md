@@ -6,7 +6,7 @@
 ![WAMP](https://img.shields.io/static/v1?label=<LABEL>&message=<MESSAGE>&color=<COLOR>)
 ##  Install Guide
  get WAMP from https://www.wampserver.com/en/download-wampserver-64bits/
---- Installation of Wampserver --- Install Wampserver in, C:\wamp or D:\wamp
+--- Installation of Wampserver --- Install Wampserver in, C:\wamp64
 ````
 BEFORE proceeding with the installation of Wampserver, you must ensure that certain elements are installed on your system, otherwise Wampserver will absolutely not run, and in addition, the installation will be faulty and you need to remove Wampserver BEFORE installing the elements that were missing.
 Make sure you are "up to date" in the redistributable packages VC9, VC10, VC11, VC13, VC14, VC15, VC17 and VS16
@@ -25,11 +25,9 @@ edit VLC configuration
 http-src=C:\Program Files\VideoLAN\VLC\lua\http
 http-password=password
 ````
+---
 
-Add ports to WAMP  (right click System Tray Icon --> tools  --> add listing port) 
-edit apache config (left click  System Tray Icon --> apache --> httpd.conf)
-
-####  C:\Windows\System32\drivers\etc\hosts
+#### edit C:\Windows\System32\drivers\etc\hosts
 ```
 127.0.0.1 localhost
 ::1 localhost
@@ -40,15 +38,19 @@ edit apache config (left click  System Tray Icon --> apache --> httpd.conf)
 127.0.0.1	pc2
 ::1	pc2
 ```
+---
 
-bin/apache/apache2.4.46/wampdefineapache.conf
+Add ports 8090 & 8091 to WAMP  (right click System Tray Icon --> tools  --> add listing port) 
+edit apache config (left click  System Tray Icon --> apache --> httpd.conf)
+
+ C:/wamp64/bin/apache/apache2.4.46/wampdefineapache.conf
 ````
 MYPORT8090 = "8090"
 MYPORT8091 = "8091"
 ````
 
 
-bin/apache/apache2.4.46/conf/httpd.conf
+ C:/wamp64/bin/apache/apache2.4.46/conf/httpd.conf
 ```
 Listen 8050
 Listen 0.0.0.0:80
@@ -67,8 +69,9 @@ LoadModule alias_module modules/mod_alias.so
 ````
 
 
-### Virtual Hosts # Local VLC-remote front end
- bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
+### Virtual Hosts # Local VLC-remote front end 
+ Use cmd ipconfig to know your IP (192.168.x.x is local IP for wamp64 host pc)
+  C:/wamp64/bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
 ```
 <VirtualHost *:80>
     ServerName localhost
@@ -81,7 +84,7 @@ LoadModule alias_module modules/mod_alias.so
     </Directory>
 </VirtualHost>
 
-<VirtualHost 192.168.1.1:80>
+<VirtualHost 192.168.x.x:80>
     ServerName vlc
     DocumentRoot "c:/wamp64/www/vlc"
     <Directory  "c:/wamp64/www/vlc/">
@@ -92,11 +95,11 @@ LoadModule alias_module modules/mod_alias.so
 </VirtualHost>
 ````
 ## Local VLC lua http port 8080 received on 8090
- bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
+ C:/wamp64/bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
 ```
-<VirtualHost 192.168.1.1:${MYPORT8090}>
+<VirtualHost 192.168.x.x:${MYPORT8090}>
     ServerName pc
-    Redirect 301 / http://192.168.1.1:8080/
+    Redirect 301 / http://192.168.x.x:8080/
     DocumentRoot "c:/wamp64/www/vlc"
     <Directory  "c:/wamp64/www/vlc/">
         Options +Indexes +Includes +FollowSymLinks +MultiViews
@@ -106,13 +109,14 @@ LoadModule alias_module modules/mod_alias.so
 </VirtualHost>
 
 ````
-### Pc2 VLC -- send --> lua http --> 192.168.1.*:8081/ 
- 192.168.1.*:8081 --> Redirected to 192.168.1.1:8091
- bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
+### Pc2 VLC -- send --> lua http --> port: 8080 = 192.168.x.2:8080/ 
+  192.168.x.2:8080 --> PC2 Redirected to PC1 port 8091 --> 192.168.x.x:8091
+ (192.168.x.x = wamp64 pc)  (192.168.x.2 = IP of second VLC PC)
+  C:/wamp64/bin/apache/apache2.4.46/conf/extra/httpd-vhosts.conf
 ```
-<VirtualHost 192.168.1.1:${MYPORT8091}>
+<VirtualHost 192.168.x.x:${MYPORT8091}>
     ServerName pc2
-    Redirect 301 / http://192.168.1.*:8081/
+    Redirect 301 / http://192.168.x.2:8081/
     DocumentRoot "c:/wamp64/www/vlc"
     <Directory  "c:/wamp64/www/vlc/">
         Options +Indexes +Includes +FollowSymLinks +MultiViews
